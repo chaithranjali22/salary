@@ -1,0 +1,55 @@
+#include <stdio.h>
+
+void calculateTotalMarks(int marks[][10], int n, int m, int totalMarks[]) {
+    for (int i = 0; i < n; i++) {
+        totalMarks[i] = 0;
+        for (int j = 0; j < m; j++) {
+            totalMarks[i] += marks[i][j];
+        }
+    }
+}
+
+void sortStudents(int totalMarks[], int n, int index[]) {
+    for (int i = 0; i < n; i++) index[i] = i;
+    
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (totalMarks[j] < totalMarks[j + 1]) {
+                int temp = totalMarks[j];
+                totalMarks[j] = totalMarks[j + 1];
+                totalMarks[j + 1] = temp;
+                int tempIndex = index[j];
+                index[j] = index[j + 1];
+                index[j + 1] = tempIndex;
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    printf("Enter number of students: ");
+    scanf("%d", &n);
+    printf("Enter number of subjects: ");
+    scanf("%d", &m);
+
+    int marks[n][10], totalMarks[n], index[n];
+
+    printf("Enter marks:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Student %d: ", i + 1);
+        for (int j = 0; j < m; j++) {
+            scanf("%d", &marks[i][j]);
+        }
+    }
+
+    calculateTotalMarks(marks, n, m, totalMarks);
+    sortStudents(totalMarks, n, index);
+
+    printf("Sorted Student Marks:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Student %d: Total Marks = %d\n", index[i] + 1, totalMarks[i]);
+    }
+
+    return 0;
+}
