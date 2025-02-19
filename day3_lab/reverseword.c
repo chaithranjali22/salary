@@ -1,34 +1,54 @@
 #include <stdio.h>
 #include <string.h>
-void reverseWord(char *start, char *end) {
-    while (start < end) {
-        char temp = *start;
-        *start = *end;
-        *end = temp;
-        start++;
-        end--;
+void reverseWord(char word[]) 
+{
+    int len = strlen(word);
+    for (int i = 0; i < len / 2; i++) 
+    {
+        char temp = word[i];
+        word[i] = word[len - 1 - i];
+        word[len - 1 - i] = temp;
     }
 }
-void reverseWords(char str[]) {
-    int len = strlen(str);
+
+void reverseWords(char str[]) 
+{
     int start = 0;
-   for (int i = 0; i <= len; i++) {
-        if (str[i] == ' ' || str[i] == '\0') {
-            reverseWord(&str[start], &str[i - 1]);
-            start = i + 1;
+    int len = strlen(str);
+
+    for (int i = 0; i <= len; i++) {
+     
+        if (str[i] == ' ' || str[i] == '\0') 
+        {
+            char word[100];
+            int j = 0;
+            
+            
+            for (int k = start; k < i; k++)
+            {
+                word[j++] = str[k];
+            }
+            word[j] = '\0';  
+            reverseWord(word);
+            for (int k = 0; word[k] != '\0'; k++)
+            {
+                str[start + k] = word[k];
+            }
+
+            start = i + 1;  
         }
     }
 }
 
 int main() {
-    char str[100];  
+    char sentence[100];
     printf("Enter a sentence: ");
-    fgets(str, sizeof(str), stdin);
-    str[strcspn(str, "\n")] = 0; 
+    fgets(sentence, sizeof(sentence), stdin);
 
-    reverseWords(str);
+    sentence[strcspn(sentence, "\n")] = '\0';
 
-    printf("Reversed Sentence: %s\n", str);
+    reverseWords(sentence);
+    printf("Reversed Sentence: %s\n", sentence);
 
     return 0;
 }
