@@ -1,0 +1,131 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_EMPLOYEES 100
+#define MAX_NAME_LENGTH 50
+#define FILENAME "payroll.txt"
+
+typedef struct {
+    int emp_id;
+    char name[MAX_NAME_LENGTH];
+    float basic_salary;
+    float allowances;
+    float gross_salary;
+} Employee;
+
+Employee employees[MAX_EMPLOYEES];
+int num_employees = 0;
+
+float calculate_gross_salary(float basic, float allowances) {
+    return basic + allowances;
+}
+
+void save_payroll_data() {
+    FILE *file = fopen(FILENAME, "w");
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return;
+    }
+
+    for (int i = 0; i < num_employees; i++) {
+        fprintf(file, "%d,%s,%.2f,%.2f,%.2f\n",
+                employees[i].emp_id, employees[i].name,
+                employees[i].basic_salary, employees[i].allowances,
+                employees[i].gross_salary);
+    }
+
+    fclose(file);
+    printf("Record saved in \"%s\"\n", FILENAME);
+}
+
+int load_payroll_data() {
+    FILE *file = fopen(FILENAME, "r");
+    if (file == NULL) {
+        return 0; // File doesn't exist, or error opening.
+    }
+
+    num_employees = 0;
+    while (fscanf(file, "%d,%[^,],%f,%f,%f\n",
+                  &employees[num_employees].emp_id,
+                  employees[num_employees].name,
+                  &employees[num_employees].basic_salary,
+                  &employees[num_employees].allowances,
+                  &employees[num_employees].gross_salary) == 5) {
+        num_employees++;
+        if (num_employees >= MAX_EMPLOYEES) {
+            fprintf(stderr, "Warning: Maximum employee limit reached.\n");
+            break;
+        }
+    }
+
+    fclose(file);
+    return num_employees;
+}
+
+Employee *find_employee(int emp_id) {
+    for (int i = 0; i < num_employees; i++) {
+        if (employees[i].emp_id == emp_id) {
+            return &employees[i];
+        }
+    }
+    return NULL;
+}
+
+int main() {
+    int num_input_employees, emp_id_search;
+    char input_line[200];
+    char *token;
+    float basic, allowances;
+    load_payroll_data();
+
+    printf("Enter number of employees: ");
+    scanf("%d", &num_input_employees);
+    getchar(); // Consume newline
+
+    for (int i = 0; i < num_input_employees; i++) {
+        printf("Employee %d: ", i + 1);
+        fgets(input_line, sizeof(input_line), stdin);
+
+        token = strtok(input_line, ",");
+        if (token != NULL) {
+            employees[num_employees].emp_id = atoi(token);
+        }
+
+        token = strtok(NULL, ",");
+        if (token != NULL) {
+            strcpy(employees[num_employees].name, token);
+        }
+
+        token = strtok(NULL, "₹"); //remove '₹'
+        token = strtok(token,",");
+        if (token != NULL) {
+            employees[num_employees].basic_salary = atof(token);
+        }
+
+        token = strtok(NULL, "₹"); 
+        if (token != NULL) {
+            employees[num_employees].allowances = atof(token);
+        }
+
+        employees[num_employees].gross_salary = calculate_gross_salary(
+            employees[num_employees].basic_salary, employees[num_employees].allowances);
+        num_employees++;
+    }
+
+    save_payroll_data();
+
+    printf("Enter Employee ID to search: ");
+    scanf("%d", &emp_id_search);
+
+    Employee *found_employee = find_employee(emp_id_search);
+    if (found_employee != NULL) {
+        printf("Employee: %s\n", found_employee->name);
+        printf("Gross Salary: ₹%.2f\n", found_employee->gross_salary);
+    } else {
+        printf("Employee not found.\n");
+    }
+
+    return 0;
+}
+
